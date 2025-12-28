@@ -6,7 +6,7 @@ import os
 
 app = Flask(__name__)
 
-model = tf.keras.models.load_model("rice_inceptionV3_model (1).h5")
+model = tf.keras.models.load_model("rice_inceptionV3_model.h5")
 
 classes = [
     "BLB",
