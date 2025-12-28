@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rice Disease Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h1>Rice Crop Disease Detection</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="image" required>
+
+        <select name="weather">
+            <option value="">Select Current Weather</option>
+            <option value="Warm and Humid">Warm and Humid</option>
+            <option value="Rainy">Rainy</option>
+            <option value="Moderate">Moderate</option>
+            <option value="Dry & Hot">Dry & Hot</option>
+            <option value="Cloudy & Cool">Cloudy & Cool</option>
+        </select>
+
+        <button type="submit">Predict</button>
+    </form>
+
+    {% if prediction %}
+        <div class="result">
+            <h2>Disease Detected: {{ prediction }}</h2>
+
+            {% if prediction != "Normal" and treatment %}
+                <h3>Recommended Treatment:</h3>
+                <p>{{ treatment }}</p>
+            {% elif prediction != "Normal" %}
+                <p>Please select weather condition to get treatment.</p>
+            {% else %}
+                <p>Crop is healthy. No treatment required.</p>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+</body>
+</html>
