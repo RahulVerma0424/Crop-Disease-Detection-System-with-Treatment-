@@ -1,8 +1,7 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import tensorflow as tf
 import numpy as np
 from tensorflow.keras.preprocessing import image
-import os
 
 app = Flask(__name__)
 
@@ -17,6 +16,15 @@ classes = [
     "Sheath Blight",
     "Tungro Virus"
 ]
+
+# Weather value mapping (FRONTEND → LOGIC)
+weather_map = {
+    "warm_humid": "Warm and Humid",
+    "rainy": "Rainy",
+    "moderate": "Moderate",
+    "hot_dry": "Dry & Hot",
+    "cloudy_cool": "Cloudy & Cool"
+}
 
 treatments = {
     "Blast": {
@@ -64,41 +72,45 @@ treatments = {
     }
 }
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
 def index():
-    prediction = None
-    treatment = None
-    weather = None
+    return render_template("index.html")
 
-    if request.method == "POST":
+@app.route("/predict", methods=["POST"])
+def predict():
+    if "image" not in request.files:
+        return jsonify({"status": "error", "message": "Image nahi mili"})
 
-        # IMAGE PROCESSING (ALWAYS)
-        if "image" in request.files:
-            file = request.files["image"]
+    img_file = request.files["image"]
+    weather_key = request.form.get("weather")
 
-            if file.filename != "":
-                img_path = "static/uploaded.jpg"
-                file.save(img_path)
+    if img_file.filename == "":
+        return jsonify({"status": "error", "message": "Image empty hai"})
 
-                img = image.load_img(img_path, target_size=(224, 224))
-                img_array = image.img_to_array(img)
-                img_array = np.expand_dims(img_array, axis=0) / 255.0
+    weather = weather_map.get(weather_key)
+    if not weather:
+        return jsonify({"status": "error", "message": "Invalid weather selection"})
 
-                preds = model.predict(img_array)
-                prediction = classes[np.argmax(preds)]
+    img_path = "static/temp.jpg"
+    img_file.save(img_path)
 
-        # WEATHER + TREATMENT (ONLY IF DISEASE FOUND)
-        weather = request.form.get("weather")
+    img = image.load_img(img_path, target_size=(224, 224))
+    img_arr = image.img_to_array(img)
+    img_arr = np.expand_dims(img_arr, axis=0) / 255.0
 
-        if prediction and prediction != "Normal" and weather:
-            treatment = treatments[prediction][weather]
+    preds = model.predict(img_arr)
+    disease = classes[np.argmax(preds)]
 
-    return render_template(
-        "index.html",
-        prediction=prediction,
-        treatment=treatment,
-        weather=weather
-    )
+    if disease == "Normal":
+        treatment = "Fasal bilkul swasth hai. Koi upchar ki avashyakta nahi."
+    else:
+        treatment = treatments[disease][weather]
+
+    return jsonify({
+        "status": "success",
+        "prediction": disease,
+        "treatment": treatment
+    })
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=7860)
+    app.run(debug=True, port=7860)
