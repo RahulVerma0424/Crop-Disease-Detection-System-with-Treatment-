@@ -1,39 +1,42 @@
 body {
-    background-color: #f2f7f3;
-    font-family: Arial;
+    -webkit-font-smoothing: antialiased;
 }
 
-.container {
-    width: 420px;
-    margin: auto;
-    background: white;
-    padding: 20px;
-    margin-top: 40px;
+@keyframes scan {
+    0% { top: 0; opacity: 0; }
+    50% { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+}
+
+.scanning {
+    animation: scan 2s linear infinite;
+    display: block !important;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
     border-radius: 10px;
-    box-shadow: 0 0 10px #aaa;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
 
-h1 {
-    text-align: center;
-    color: green;
+#dropContainer:hover {
+    box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.15);
 }
 
-input, select, button {
-    width: 100%;
-    margin-top: 10px;
-    padding: 8px;
+#leafPreview {
+    transition: transform 0.3s ease;
 }
-
-button {
-    background-color: green;
-    color: white;
-    border: none;
-    cursor: pointer;
+#leafPreview:hover {
+    transform: scale(1.02);
 }
-
-.result {
-    margin-top: 20px;
-    background: #eafbea;
-    padding: 10px;
-    border-radius: 5px;
+#leafPreview.scanning {
+    animation: none;
 }
